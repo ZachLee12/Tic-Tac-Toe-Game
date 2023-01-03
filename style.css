@@ -30,6 +30,7 @@ html {
 
 /* The Modal (background) */
 .modal {
+    display: none;
     position: fixed;
     /* Stay in place */
     z-index: 1;

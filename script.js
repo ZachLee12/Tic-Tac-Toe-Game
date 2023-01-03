@@ -1,4 +1,3 @@
-//module with "gameboard" namespace
 const gameBoard = (function () {
     const _board = ["", "", "", "", "", "", "", "", ""];
 
@@ -8,147 +7,168 @@ const gameBoard = (function () {
         _board[field] = char;
     }
 
-    return { getGameBoard, setField }
+    return {
+        getGameBoard,
+        setField
+    }
 }());
 
-//factory
-const createPlayer = (name, team) => {
+
+//player factory
+const createPlayer = function (name, team) {
+    const playerName = name;
+    const playerTeam = team;
+    let win = false;
+    let playersTurn = false;
+
+    const setWin = boolean => win = boolean;
+    const setPlayersTurn = boolean => playersTurn = boolean;
+    const getWin = () => win;
+    const getPlayersTurn = () => playersTurn;
+    const getPlayerName = () => playerName;
+    const getPlayerTeam = () => playerTeam;
+
     return {
-        name,
-        team,
-        win: false,
-        playersTurn: false,
-        toggleTurn() {
-            this.playersTurn = !this.playersTurn;
-        }
+        setWin,
+        setPlayersTurn,
+        getWin,
+        getPlayerName,
+        getPlayersTurn,
+        getPlayerTeam
     }
 }
 
-const displayController = (function (board) {
-    let _player1 = null;
-    let _player2 = null;
-    let gameOver = false;
+const DOMCache = (function () {
+    //players info
+    const playerOneName = document.getElementById('player1-name').value
+    const playerTwoName = document.getElementById('player2-name').value
+    const playerOneTeam = document.getElementById('player1-team').value
+    const playerTwoTeam = document.getElementById('player2-team').value
 
-    const _changePlayerSign = (parent, child, char) => {
-        child.innerHTML = char;
-        board.setField(parent.id, char)
+    //DOM fields
+    const DOMFields = (() => {
+        let fields = [];
+        document.querySelectorAll('.field').forEach((div) => {
+            fields.push(div)
+        })
+        return fields;
+    })()
+
+    //player's turn
+    const playersTurnDiv = document.querySelector('.players-turn')
+
+    return {
+        playerOneName,
+        playerOneTeam,
+        playerTwoName,
+        playerTwoTeam,
+        playersTurnDiv,
+        DOMFields
+    }
+})();
+
+//IIFE (main)
+const displayController = (function () {
+    const render = () => {
+        DOMCache.DOMFields.forEach((field) => {
+            field.innerHTML = gameBoard.getGameBoard()[field.id];
+        })
     }
 
-    const _checkFieldEmpty = (field) => {
-        return field.innerHTML === "";
+    const updatePlayersTurn = (name) => {
+        DOMCache.playersTurnDiv.innerHTML = `${name}'s turn!`;
     }
 
-    //returns a "result" object
-    const _checkGameOver = (board, playerOne, playerTwo) => {
-        let nobodyWins = false;
-        let winner = null;
+    const updateBoard = (field, char, playerName) => {
+        gameBoard.setField(field.id, char)
+        updatePlayersTurn(playerName)
+        render();
+    }
+
+
+    return {
+        updateBoard
+    }
+})();
+
+const gameOverChecker = (function () {
+    function _checkWin() {
         //horizontal win
-        if (board[0] === board[1] && board[1] === board[2] && board[2] !== "") {
-            gameOver = true;
-        } else if (board[3] === board[4] && board[4] === board[5] && board[5] !== "") {
-            gameOver = true;
-        } else if (board[6] === board[7] && board[7] === board[8] && board[8] !== "") {
-            gameOver = true;
-        } else if (board[0] === board[3] && board[3] === board[6] && board[6] !== "") {
-            gameOver = true;
-        } else if (board[1] === board[4] && board[4] === board[7] && board[7] !== "") {
-            gameOver = true;
-        } else if (board[2] === board[5] && board[5] === board[8] && board[8] !== "") {
-            gameOver = true;
-        } else if (board[0] === board[4] && board[4] === board[8] && board[8] !== "") {
-            gameOver = true;
-        } else if (board[2] === board[4] && board[4] === board[6] && board[6] !== "") {
-            gameOver = true;
+        if (gameBoard.getGameBoard()[0] !== '' && gameBoard.getGameBoard()[0] === gameBoard.getGameBoard()[1] && gameBoard.getGameBoard()[1] === gameBoard.getGameBoard()[2]) {
+            modal.style.display = "block";
+        }
+        else if (gameBoard.getGameBoard()[3] !== '' && gameBoard.getGameBoard()[3] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[5]) {
+            modal.style.display = "block";
+        }
+        else if (gameBoard.getGameBoard()[6] !== '' && gameBoard.getGameBoard()[6] === gameBoard.getGameBoard()[7] && gameBoard.getGameBoard()[7] === gameBoard.getGameBoard()[8]) {
+            modal.style.display = "block";
         }
 
-        if (board.filter(field => field === "").length === 0) {
-            gameOver = true;
-            nobodyWins = true;
+        //vertical win
+        if (gameBoard.getGameBoard()[0] !== '' && gameBoard.getGameBoard()[0] === gameBoard.getGameBoard()[3] && gameBoard.getGameBoard()[3] === gameBoard.getGameBoard()[6]) {
+            modal.style.display = "block";
+        }
+        else if (gameBoard.getGameBoard()[1] !== '' && gameBoard.getGameBoard()[1] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[7]) {
+            modal.style.display = "block";
+        }
+        else if (gameBoard.getGameBoard()[2] !== '' && gameBoard.getGameBoard()[2] === gameBoard.getGameBoard()[5] && gameBoard.getGameBoard()[5] === gameBoard.getGameBoard()[8]) {
+            modal.style.display = "block";
         }
 
-        if (gameOver && !nobodyWins) {
-            if (!playerOne.playersTurn) {
-                winner = playerOne.name
-            } else {
-                winner = playerTwo.name
-            }
+        //diagonal win
+        if (gameBoard.getGameBoard()[0] !== '' && gameBoard.getGameBoard()[0] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[8]) {
+            modal.style.display = "block";
         }
-
-        return {
-            gameOver,
-            nobodyWins,
-            winner
-        };
-    }
-
-    const displayBoard = () => {
-        for (let i = 0; i < 9; i++) {
-            let field = document.getElementById(`${i}`)
-            let charDiv = document.createElement('div')
-            charDiv.innerHTML = board.getGameBoard()[i]
-            field.append(charDiv)
+        else if (gameBoard.getGameBoard()[2] !== '' && gameBoard.getGameBoard()[2] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[6]) {
+            modal.style.display = "block";
         }
     }
 
-    //IIFE
-    const _initFieldFunctions = (() => {
-        document.querySelectorAll('.field').forEach((field) => {
-            field.addEventListener('click', (e) => {
-                let parent = e.target;
-                let child = e.target.children[0];
-                let gameBoard = board.getGameBoard();
-                let gameOverResult = _checkGameOver(gameBoard, _player1, _player2)
+    function _checkNobodyWins() {
+        if (gameBoard.getGameBoard().filter((char) => char === '').length === 0) {
+            modal.style.display = "block";
+        }
+    }
 
-                if (_checkFieldEmpty(child)) {
-                    if (_player1.playersTurn) {
-                        _changePlayerSign(parent, child, "X")
-                    } else if (_player2.playersTurn) {
-                        _changePlayerSign(parent, child, "O")
-                    }
-                }
-                if (gameOverResult.gameOver) {
-                    console.log(gameOverResult)
-                }
-                _player1.toggleTurn();
-                _player2.toggleTurn();
-            })
-        })
+    function checkGameOver() {
+        _checkWin();
+        _checkNobodyWins();
+    }
+    return {
+        checkGameOver
+    }
+})();
 
-
-    })();
-
-    const _initPlayers = () => {// init two players
-        //player one
-        let playerOneName = document.getElementById('player1-name').value;
-        let playerOneTeam = document.getElementById('player1-team').value;
-        //player two
-        let playerTwoName = document.getElementById('player2-name').value;
-        let playerTwoTeam = document.getElementById('player2-team').value;
-        _player1 = createPlayer(playerOneName, playerOneTeam);
-        _player2 = createPlayer(playerTwoName, playerTwoTeam);
-
-        _player1.toggleTurn(); //player1 starts first
-        console.log(_player1)
-        console.log(_player2)
-    };
-
-    const _initPlayButton = (() => {
-        const playBtn = document.querySelector('#play-btn')
-        playBtn.addEventListener('click', (e) => {
-            if (e.target.parentElement.checkValidity()) {
-                _initPlayers();
-                modal.style.display = "none"; //close the modal
-            }
-        })
-    })();
-
-    return { displayBoard }
-}(gameBoard));
+//main IIFE module
+const gameController = (function () {
+    //players
+    const playerOne = createPlayer(DOMCache.playerOneName, DOMCache.playerOneTeam)
+    const playerTwo = createPlayer(DOMCache.playerTwoName, DOMCache.playerTwoTeam);
+    function placeCharOnField(field) {
+        if (field.innerHTML !== "") return;
+        if (playerOne.getPlayersTurn()) {
+            displayController.updateBoard(field, playerOne.getPlayerTeam(),playerTwo.getPlayerTeam())
+            playerOne.setPlayersTurn(false);
+            playerTwo.setPlayersTurn(true);
+        } else {
+            displayController.updateBoard(field, playerTwo.getPlayerTeam(),playerOne.getPlayerTeam())
+            playerOne.setPlayersTurn(true);
+            playerTwo.setPlayersTurn(false);
+        }
+    }
+    //initialize game
+    playerOne.setPlayersTurn(true);
+    DOMCache.DOMFields.forEach((field) => {
+        field.addEventListener('click', placeCharOnField.bind(this, field));
+        field.addEventListener('click', gameOverChecker.checkGameOver);
+    })
+})();
 
 
 
 
-displayController.displayBoard();
+
+
 
 
 
