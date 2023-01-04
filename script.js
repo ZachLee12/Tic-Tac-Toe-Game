@@ -111,6 +111,10 @@ const displayController = (function () {
         DOMCache.playersTurnDiv.innerHTML = `${name}'s turn!`;
     }
 
+    const updateEndGameText = () => {
+        DOMCache.playersTurnDiv.innerHTML = `Good Game!`;
+    }
+
     const updateBoard = (field, char, playerName) => {
         gameBoard.setField(field.id, char)
         _updatePlayersTurn(playerName)
@@ -135,7 +139,8 @@ const displayController = (function () {
         displayPlayerFormModal,
         displayWinnerModal,
         resetPlayersTurn,
-        renderBoard
+        renderBoard,
+        updateEndGameText
     }
 })();
 
@@ -235,7 +240,6 @@ const gameController = (function () {
     function changePlayers() {
         resetGame();
         displayController.displayPlayerFormModal('block')
-
     }
 
     //gameController functions
@@ -261,6 +265,7 @@ const gameController = (function () {
             displayController.displayWinnerModal(`${resultObj.winner} wins!`, 'block')
             resultObj = gameOverChecker.reset();
         }
+        displayController.updateEndGameText();
     }
 
     function initializeGame(playerOneName, playerOneTeam, playerTwoName, playerTwoTeam) {
