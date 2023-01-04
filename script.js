@@ -260,8 +260,8 @@ const gameController = (function () {
         console.log(resultObj);
         if (resultObj.nobodyWon) {
             displayController.displayWinnerModal("It's a tie!", 'block')
-            resultObj = gameOverChecker.reset();
-            displayController.updateEndGameText();
+            resultObj = gameOverChecker.reset()
+            displayController.updateEndGameText()
         } else if (resultObj.someoneWon) {
             displayController.displayWinnerModal(`${resultObj.winner} wins!`, 'block')
             resultObj = gameOverChecker.reset();
