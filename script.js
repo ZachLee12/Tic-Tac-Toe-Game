@@ -85,7 +85,6 @@ const displayController = (function () {
         render();
     }
 
-
     return {
         updateBoard
     }
@@ -147,11 +146,11 @@ const gameController = (function () {
     function placeCharOnField(field) {
         if (field.innerHTML !== "") return;
         if (playerOne.getPlayersTurn()) {
-            displayController.updateBoard(field, playerOne.getPlayerTeam(),playerTwo.getPlayerTeam())
+            displayController.updateBoard(field, playerOne.getPlayerTeam(), playerTwo.getPlayerName())
             playerOne.setPlayersTurn(false);
             playerTwo.setPlayersTurn(true);
         } else {
-            displayController.updateBoard(field, playerTwo.getPlayerTeam(),playerOne.getPlayerTeam())
+            displayController.updateBoard(field, playerTwo.getPlayerTeam(), playerOne.getPlayerName())
             playerOne.setPlayersTurn(true);
             playerTwo.setPlayersTurn(false);
         }
