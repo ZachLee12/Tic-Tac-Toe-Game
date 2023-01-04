@@ -119,8 +119,8 @@ const displayController = (function () {
         renderBoard();
     }
 
-    const resetPlayersTurn = () => {
-        DOMCache.playersTurnDiv.innerHTML = 'Good Luck!';
+    const resetPlayersTurn = (player) => {
+        DOMCache.playersTurnDiv.innerHTML = `${player.getPlayerName()}'s turn!`;
     }
 
     const displayPlayerFormModal = (displayModal) => {
@@ -232,7 +232,7 @@ const gameController = (function () {
     function resetGame() {
         gameBoard.resetBoard();
         displayController.renderBoard();
-        displayController.resetPlayersTurn();
+        displayController.resetPlayersTurn(playerOne);
         displayController.displayWinnerModal('', 'none')
     }
 
@@ -251,7 +251,6 @@ const gameController = (function () {
 
     function finalizeGame(playerOne, playerTwo) {
         let resultObj = gameOverChecker.checkGameOver(playerOne, playerTwo)
-        console.log(resultObj);
         if (resultObj.nobodyWon) {
             displayController.displayWinnerModal("It's a tie!", 'block')
             resultObj = gameOverChecker.reset();
@@ -272,7 +271,7 @@ const gameController = (function () {
         playerOne.setPlayersTurn(true);
 
         //starting text 
-        DOMCache.playersTurnDiv.innerHTML = 'Good Luck!'
+        DOMCache.playersTurnDiv.innerHTML = `${playerOne.getPlayerName()}'s turn!`
 
         function placeCharOnField(field) {
             if (field.innerHTML !== "") return;
@@ -285,8 +284,6 @@ const gameController = (function () {
                 playerOne.setPlayersTurn(true);
                 playerTwo.setPlayersTurn(false);
             }
-
-            console.log('playerOne in placeCharOnField is: ' + playerOne.getPlayerName())
         }
 
         //bind() bug here, the old players still retain,
@@ -296,7 +293,6 @@ const gameController = (function () {
             field.addEventListener('click', placeCharOnField.bind(this, field, playerOne, playerTwo));
             field.addEventListener('click', finalizeGame.bind(this, playerOne, playerTwo));
         })
-        console.log('playerOne in initializeGame is: ' + playerOne.getPlayerName())
     }
 })();
 
