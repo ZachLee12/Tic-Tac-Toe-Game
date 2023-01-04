@@ -261,11 +261,12 @@ const gameController = (function () {
         if (resultObj.nobodyWon) {
             displayController.displayWinnerModal("It's a tie!", 'block')
             resultObj = gameOverChecker.reset();
+            displayController.updateEndGameText();
         } else if (resultObj.someoneWon) {
             displayController.displayWinnerModal(`${resultObj.winner} wins!`, 'block')
             resultObj = gameOverChecker.reset();
+            displayController.updateEndGameText();
         }
-        displayController.updateEndGameText();
     }
 
     function initializeGame(playerOneName, playerOneTeam, playerTwoName, playerTwoTeam) {
