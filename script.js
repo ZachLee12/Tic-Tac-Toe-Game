@@ -110,7 +110,7 @@ const displayController = (function () {
     }
 
     const updateEndGameText = () => {
-        DOMCache.playersTurnDiv.innerHTML = `Good Game!`;
+        DOMCache.playersTurnDiv.innerHTML = `Good Game!`; 
     }
 
     const updateBoard = (field, char, playerName) => {
@@ -270,6 +270,9 @@ const gameController = (function () {
 
         //initialize field functions
         playerOne.setPlayersTurn(true);
+
+        //starting text 
+        DOMCache.playersTurnDiv.innerHTML = 'Good Luck!'
 
         function placeCharOnField(field) {
             if (field.innerHTML !== "") return;
