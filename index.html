@@ -17,29 +17,27 @@
     </header>
 
     <main class="main">
-        <div  class="gameboard-wrapper">
-        <section class="gameboard">
-            <div class="field field-0" id="0"></div>
-            <div class="field field-1" id="1"></div>
-            <div class="field field-2" id="2"></div>
-            <div class="field field-3" id="3"></div>
-            <div class="field field-4" id="4"></div>
-            <div class="field field-5" id="5"></div>
-            <div class="field field-6" id="6"></div>
-            <div class="field field-7" id="7"></div>
-            <div class="field field-8" id="8"></div>
-        </section>
-    </div>
+        <div class="gameboard-wrapper">
+            <section class="gameboard">
+                <div class="field field-0" id="0"></div>
+                <div class="field field-1" id="1"></div>
+                <div class="field field-2" id="2"></div>
+                <div class="field field-3" id="3"></div>
+                <div class="field field-4" id="4"></div>
+                <div class="field field-5" id="5"></div>
+                <div class="field field-6" id="6"></div>
+                <div class="field field-7" id="7"></div>
+                <div class="field field-8" id="8"></div>
+            </section>
+        </div>
 
         <div class="players-turn">Good luck!</div>
 
-        <!-- The Initial Modal -->
-        <div id="myModal" class="initial-modal">
+        <!-- Player Form Modal -->
+        <div id="player-form-modal" class="initial-modal">
 
             <!-- Modal content -->
-            <div class="modal-content">
-                <span class="close">&times;</span>
-
+            <div class="player-form-modal-content">
                 <form class="player-form" action="" onsubmit="return false">
                     <div class="player-container">
                         <div class="name-container">
@@ -65,7 +63,18 @@
                     <button type="submit" id="play-btn">Let's play!</button>
                 </form>
             </div>
+        </div>
 
+        <!-- Winner Form Modal -->
+        <div id="winner-modal">
+            <!-- Modal content -->
+            <div class="winner-modal-content">
+                <div class="winner">Winner wins!</div>
+                <div class="game-over-buttons-container">
+                    <button>Play Again</button>
+                    <button>Change Players</button>
+                </div>
+            </div>
         </div>
     </main>
 

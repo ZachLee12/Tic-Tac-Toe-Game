@@ -1,16 +1,3 @@
-// Get the modal
-var modal = document.getElementById("myModal");
-
-// Get the button that opens the modal
-var btn = document.getElementById("myBtn");
-
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
-
-// When the user clicks on <span> (x), close the modal
-span.onclick = function () {
-    modal.style.display = "none";
-}
 
 const gameBoard = (function () {
     const _board = ["", "", "", "", "", "", "", "", ""];
@@ -83,35 +70,55 @@ const DOMCache = (function () {
 
     //play button
     const playButton = document.querySelector('#play-btn');
+
+    //modals
+    const playerFormModal = document.getElementById("player-form-modal");
+    const winnerModal = document.getElementById("winner-modal");
+    const winnerNameContainer = document.querySelector('.winner')
+
     return {
         playersTurnDiv,
         playButton,
         cachePlayersInfo,
         DOMFields,
-        form
+        form,
+        playerFormModal,
+        winnerModal,
+        winnerNameContainer
     }
 })();
 
 //IIFE (main)
 const displayController = (function () {
-    const render = () => {
+    const _render = () => {
         DOMCache.DOMFields.forEach((field) => {
             field.innerHTML = gameBoard.getGameBoard()[field.id];
         })
     }
 
-    const updatePlayersTurn = (name) => {
+    const _updatePlayersTurn = (name) => {
         DOMCache.playersTurnDiv.innerHTML = `${name}'s turn!`;
     }
 
     const updateBoard = (field, char, playerName) => {
         gameBoard.setField(field.id, char)
-        updatePlayersTurn(playerName)
-        render();
+        _updatePlayersTurn(playerName)
+        _render();
+    }
+
+    const displayPlayerFormModal = (value) => {
+        DOMCache.playerFormModal.style.display = `${value}`
+    }
+
+    const displayWinnerModal = (winner, value) => {
+        DOMCache.winnerNameContainer.textContent = winner;
+        DOMCache.winnerModal.style.display = `${value}`;
     }
 
     return {
-        updateBoard
+        updateBoard,
+        displayPlayerFormModal,
+        displayWinnerModal
     }
 })();
 
@@ -119,44 +126,44 @@ const gameOverChecker = (function () {
     function _checkWin() {
         //horizontal win
         if (gameBoard.getGameBoard()[0] !== '' && gameBoard.getGameBoard()[0] === gameBoard.getGameBoard()[1] && gameBoard.getGameBoard()[1] === gameBoard.getGameBoard()[2]) {
-            modal.style.display = "block";
+            return true;
         }
         else if (gameBoard.getGameBoard()[3] !== '' && gameBoard.getGameBoard()[3] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[5]) {
-            modal.style.display = "block";
+            return true;
         }
         else if (gameBoard.getGameBoard()[6] !== '' && gameBoard.getGameBoard()[6] === gameBoard.getGameBoard()[7] && gameBoard.getGameBoard()[7] === gameBoard.getGameBoard()[8]) {
-            modal.style.display = "block";
+            return true;
         }
 
         //vertical win
         if (gameBoard.getGameBoard()[0] !== '' && gameBoard.getGameBoard()[0] === gameBoard.getGameBoard()[3] && gameBoard.getGameBoard()[3] === gameBoard.getGameBoard()[6]) {
-            modal.style.display = "block";
+            return true;
         }
         else if (gameBoard.getGameBoard()[1] !== '' && gameBoard.getGameBoard()[1] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[7]) {
-            modal.style.display = "block";
+            return true;
         }
         else if (gameBoard.getGameBoard()[2] !== '' && gameBoard.getGameBoard()[2] === gameBoard.getGameBoard()[5] && gameBoard.getGameBoard()[5] === gameBoard.getGameBoard()[8]) {
-            modal.style.display = "block";
+            return true;
         }
 
         //diagonal win
         if (gameBoard.getGameBoard()[0] !== '' && gameBoard.getGameBoard()[0] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[8]) {
-            modal.style.display = "block";
+            return true;
         }
         else if (gameBoard.getGameBoard()[2] !== '' && gameBoard.getGameBoard()[2] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[6]) {
-            modal.style.display = "block";
+            return true;
         }
     }
 
     function _checkNobodyWins() {
         if (gameBoard.getGameBoard().filter((char) => char === '').length === 0) {
-            modal.style.display = "block";
+            displayController.displayPlayerFormModal('block')
         }
     }
 
     function checkGameOver() {
-        _checkWin();
-        _checkNobodyWins();
+        let someoneWon = (function () { _checkWin })();
+        let nobodyWon = (function () { _checkNobodyWins })();
     }
     return {
         checkGameOver
@@ -165,11 +172,12 @@ const gameOverChecker = (function () {
 
 //main IIFE module
 const gameController = (function () {
+    //initialize game after playerFormModal is filled and 'Let's play' is clicked
     DOMCache.playButton.addEventListener('click', () => {
         if (!DOMCache.form.checkValidity()) return;
         const playerInfo = DOMCache.cachePlayersInfo()
         initializeGame(playerInfo.playerOneName, playerInfo.playerOneTeam, playerInfo.playerTwoName, playerInfo.playerTwoTeam)
-        modal.style.display = 'none'
+        displayController.displayPlayerFormModal('none')
     })
 
     function initializeGame(playerOneName, playerOneTeam, playerTwoName, playerTwoTeam) {
@@ -188,7 +196,7 @@ const gameController = (function () {
                 playerTwo.setPlayersTurn(false);
             }
         }
-        //initialize game
+        //initialize field functions
         playerOne.setPlayersTurn(true);
         DOMCache.DOMFields.forEach((field) => {
             field.addEventListener('click', placeCharOnField.bind(this, field));
