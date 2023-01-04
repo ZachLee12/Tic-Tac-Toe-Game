@@ -217,14 +217,39 @@ const gameOverChecker = (function () {
 
 //main IIFE module
 const gameController = (function () {
+    let playerOne = null;
+    let playerTwo = null;
 
-    //initialize game after playerFormModal is filled and 'Let's play' is clicked
-    DOMCache.playButton.addEventListener('click', () => {
+    //initialize game buttons
+    DOMCache.playButton.addEventListener('click', initializePlayerForm)
+
+    DOMCache.playAgainButton.addEventListener('click', resetGame)
+    DOMCache.changePlayers.addEventListener('click', changePlayers)
+    function resetGame() {
+        gameBoard.resetBoard();
+        displayController.renderBoard();
+        displayController.resetPlayersTurn();
+        displayController.displayWinnerModal('', 'none')
+    }
+
+    function changePlayers() {
+        resetGame();
+        displayController.displayPlayerFormModal('block')
+
+    }
+
+    //gameController functions
+    function initializePlayerForm() {
         if (!DOMCache.form.checkValidity()) return;
-        const playerInfo = DOMCache.cachePlayersInfo()
+        let playerInfo = DOMCache.cachePlayersInfo()
+        //game is only initialized if form is valid
         initializeGame(playerInfo.playerOneName, playerInfo.playerOneTeam, playerInfo.playerTwoName, playerInfo.playerTwoTeam)
         displayController.displayPlayerFormModal('none')
-    })
+    }
+
+    // function addPlayButtonListener() {
+    //     DOMCache.playButton.addEventListener('click', initializePlayerForm)
+    // }
 
     function finalizeGame(playerOne, playerTwo) {
         let resultObj = gameOverChecker.checkGameOver(playerOne, playerTwo)
@@ -240,8 +265,12 @@ const gameController = (function () {
 
     function initializeGame(playerOneName, playerOneTeam, playerTwoName, playerTwoTeam) {
         //players
-        const playerOne = createPlayer(playerOneName, playerOneTeam)
-        const playerTwo = createPlayer(playerTwoName, playerTwoTeam);
+        playerOne = createPlayer(playerOneName, playerOneTeam)
+        playerTwo = createPlayer(playerTwoName, playerTwoTeam);
+
+        //initialize field functions
+        playerOne.setPlayersTurn(true);
+
         function placeCharOnField(field) {
             if (field.innerHTML !== "") return;
             if (playerOne.getPlayersTurn()) {
@@ -253,24 +282,18 @@ const gameController = (function () {
                 playerOne.setPlayersTurn(true);
                 playerTwo.setPlayersTurn(false);
             }
+
+            console.log('playerOne in placeCharOnField is: ' + playerOne.getPlayerName())
         }
-        //initialize field functions
-        playerOne.setPlayersTurn(true);
+
+        //bind() bug here, the old players still retain,
+        //even after initializeGame is called again
+        //IF playerOne and playerTwo are local variables
         DOMCache.DOMFields.forEach((field) => {
-            field.addEventListener('click', placeCharOnField.bind(this, field));
+            field.addEventListener('click', placeCharOnField.bind(this, field, playerOne, playerTwo));
             field.addEventListener('click', finalizeGame.bind(this, playerOne, playerTwo));
         })
-
-        //initialize game buttons
-        DOMCache.playAgainButton.addEventListener('click', resetGame)
-    }
-
-    function resetGame() {
-        gameBoard.resetBoard();
-        console.log(gameBoard.getGameBoard())
-        displayController.renderBoard();
-        displayController.resetPlayersTurn();
-        displayController.displayWinnerModal('', 'none')
+        console.log('playerOne in initializeGame is: ' + playerOne.getPlayerName())
     }
 })();
 
