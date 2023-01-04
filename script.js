@@ -8,9 +8,16 @@ const gameBoard = (function () {
         _board[field] = char;
     }
 
+    const resetBoard = () => {
+        _board.forEach((field, index) => {
+            setField(index, "")
+        })
+    }
+
     return {
         getGameBoard,
-        setField
+        setField,
+        resetBoard
     }
 }());
 
@@ -68,8 +75,10 @@ const DOMCache = (function () {
     //player's turn
     const playersTurnDiv = document.querySelector('.players-turn')
 
-    //play button
+    //game buttons
     const playButton = document.querySelector('#play-btn');
+    const playAgainButton = document.querySelector('#play-again');
+    const changePlayers = document.querySelector('#change-players');
 
     //modals
     const playerFormModal = document.getElementById("player-form-modal");
@@ -84,13 +93,15 @@ const DOMCache = (function () {
         form,
         playerFormModal,
         winnerModal,
-        winnerNameContainer
+        winnerNameContainer,
+        playAgainButton,
+        changePlayers
     }
 })();
 
 //IIFE (main)
 const displayController = (function () {
-    const _render = () => {
+    const renderBoard = () => {
         DOMCache.DOMFields.forEach((field) => {
             field.innerHTML = gameBoard.getGameBoard()[field.id];
         })
@@ -103,75 +114,110 @@ const displayController = (function () {
     const updateBoard = (field, char, playerName) => {
         gameBoard.setField(field.id, char)
         _updatePlayersTurn(playerName)
-        _render();
+        renderBoard();
     }
 
-    const displayPlayerFormModal = (value) => {
-        DOMCache.playerFormModal.style.display = `${value}`
+    const resetPlayersTurn = () => {
+        DOMCache.playersTurnDiv.innerHTML = 'Good Luck!';
     }
 
-    const displayWinnerModal = (winner, value) => {
+    const displayPlayerFormModal = (displayModal) => {
+        DOMCache.playerFormModal.style.display = `${displayModal}`
+    }
+
+    const displayWinnerModal = (winner, displayModal) => {
         DOMCache.winnerNameContainer.textContent = winner;
-        DOMCache.winnerModal.style.display = `${value}`;
+        DOMCache.winnerModal.style.display = `${displayModal}`;
     }
 
     return {
         updateBoard,
         displayPlayerFormModal,
-        displayWinnerModal
+        displayWinnerModal,
+        resetPlayersTurn,
+        renderBoard
     }
 })();
 
 const gameOverChecker = (function () {
-    function _checkWin() {
+    let someoneWon = false;
+    let nobodyWon = false;
+    let winner = null;
+    function _checkWin(playerOne, playerTwo) {
         //horizontal win
         if (gameBoard.getGameBoard()[0] !== '' && gameBoard.getGameBoard()[0] === gameBoard.getGameBoard()[1] && gameBoard.getGameBoard()[1] === gameBoard.getGameBoard()[2]) {
-            return true;
+            someoneWon = true;
         }
         else if (gameBoard.getGameBoard()[3] !== '' && gameBoard.getGameBoard()[3] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[5]) {
-            return true;
+            someoneWon = true;
         }
         else if (gameBoard.getGameBoard()[6] !== '' && gameBoard.getGameBoard()[6] === gameBoard.getGameBoard()[7] && gameBoard.getGameBoard()[7] === gameBoard.getGameBoard()[8]) {
-            return true;
+            someoneWon = true;
         }
 
         //vertical win
         if (gameBoard.getGameBoard()[0] !== '' && gameBoard.getGameBoard()[0] === gameBoard.getGameBoard()[3] && gameBoard.getGameBoard()[3] === gameBoard.getGameBoard()[6]) {
-            return true;
+            someoneWon = true;
         }
         else if (gameBoard.getGameBoard()[1] !== '' && gameBoard.getGameBoard()[1] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[7]) {
-            return true;
+            someoneWon = true;
         }
         else if (gameBoard.getGameBoard()[2] !== '' && gameBoard.getGameBoard()[2] === gameBoard.getGameBoard()[5] && gameBoard.getGameBoard()[5] === gameBoard.getGameBoard()[8]) {
-            return true;
+            someoneWon = true;
         }
 
         //diagonal win
         if (gameBoard.getGameBoard()[0] !== '' && gameBoard.getGameBoard()[0] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[8]) {
-            return true;
+            someoneWon = true;
         }
         else if (gameBoard.getGameBoard()[2] !== '' && gameBoard.getGameBoard()[2] === gameBoard.getGameBoard()[4] && gameBoard.getGameBoard()[4] === gameBoard.getGameBoard()[6]) {
-            return true;
+            someoneWon = true;
+        }
+
+        if (someoneWon) {
+            if (!playerOne.getPlayersTurn()) {
+                winner = playerOne.getPlayerName();
+            } else {
+                winner = playerTwo.getPlayerName();
+            }
         }
     }
 
     function _checkNobodyWins() {
-        if (gameBoard.getGameBoard().filter((char) => char === '').length === 0) {
-            displayController.displayPlayerFormModal('block')
+        if (!someoneWon && gameBoard.getGameBoard().filter((char) => char === '').length === 0) {
+            nobodyWon = true;
         }
     }
 
-    function checkGameOver() {
-        let someoneWon = (function () { _checkWin })();
-        let nobodyWon = (function () { _checkNobodyWins })();
+    function checkGameOver(playerOne, playerTwo) {
+        _checkWin(playerOne, playerTwo);
+        _checkNobodyWins();
+        return {
+            someoneWon,
+            winner,
+            nobodyWon
+        }
+    }
+
+    function reset() {
+        someoneWon = false;
+        nobodyWon = false;
+        winner = null;
+        return {
+            someoneWon,
+            winner,
+            nobodyWon
+        }
     }
     return {
-        checkGameOver
+        checkGameOver,
+        reset
     }
 })();
 
 //main IIFE module
 const gameController = (function () {
+
     //initialize game after playerFormModal is filled and 'Let's play' is clicked
     DOMCache.playButton.addEventListener('click', () => {
         if (!DOMCache.form.checkValidity()) return;
@@ -179,6 +225,18 @@ const gameController = (function () {
         initializeGame(playerInfo.playerOneName, playerInfo.playerOneTeam, playerInfo.playerTwoName, playerInfo.playerTwoTeam)
         displayController.displayPlayerFormModal('none')
     })
+
+    function finalizeGame(playerOne, playerTwo) {
+        let resultObj = gameOverChecker.checkGameOver(playerOne, playerTwo)
+        console.log(resultObj);
+        if (resultObj.nobodyWon) {
+            displayController.displayWinnerModal("It's a tie!", 'block')
+            resultObj = gameOverChecker.reset();
+        } else if (resultObj.someoneWon) {
+            displayController.displayWinnerModal(`${resultObj.winner} wins!`, 'block')
+            resultObj = gameOverChecker.reset();
+        }
+    }
 
     function initializeGame(playerOneName, playerOneTeam, playerTwoName, playerTwoTeam) {
         //players
@@ -200,8 +258,19 @@ const gameController = (function () {
         playerOne.setPlayersTurn(true);
         DOMCache.DOMFields.forEach((field) => {
             field.addEventListener('click', placeCharOnField.bind(this, field));
-            field.addEventListener('click', gameOverChecker.checkGameOver);
+            field.addEventListener('click', finalizeGame.bind(this, playerOne, playerTwo));
         })
+
+        //initialize game buttons
+        DOMCache.playAgainButton.addEventListener('click', resetGame)
+    }
+
+    function resetGame() {
+        gameBoard.resetBoard();
+        console.log(gameBoard.getGameBoard())
+        displayController.renderBoard();
+        displayController.resetPlayersTurn();
+        displayController.displayWinnerModal('', 'none')
     }
 })();
 
