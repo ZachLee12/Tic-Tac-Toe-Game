@@ -1,4 +1,3 @@
-
 const gameBoard = (function () {
     const _board = ["", "", "", "", "", "", "", "", ""];
 
@@ -20,7 +19,6 @@ const gameBoard = (function () {
         resetBoard
     }
 }());
-
 
 //player factory
 const createPlayer = function (name, team) {
@@ -46,12 +44,14 @@ const createPlayer = function (name, team) {
     }
 }
 
+//all DOM elements are cached here 
 const DOMCache = (function () {
     const cachePlayersInfo = () => {
         let playerOneName = document.getElementById('player1-name').value
         let playerTwoName = document.getElementById('player2-name').value
         let playerOneTeam = document.getElementById('player1-team').value
         let playerTwoTeam = document.getElementById('player2-team').value
+        
         return {
             playerOneName,
             playerOneTeam,
@@ -59,8 +59,7 @@ const DOMCache = (function () {
             playerTwoTeam
         }
     }
-
-    //form
+    //player form
     const form = document.querySelector('.player-form')
 
     //DOM fields
@@ -84,7 +83,6 @@ const DOMCache = (function () {
     const playerFormModal = document.getElementById("player-form-modal");
     const winnerModal = document.getElementById("winner-modal");
     const winnerNameContainer = document.querySelector('.winner')
-
     return {
         playersTurnDiv,
         playButton,
@@ -99,7 +97,7 @@ const DOMCache = (function () {
     }
 })();
 
-//IIFE (main)
+//controls all displays on the DOM
 const displayController = (function () {
     const renderBoard = () => {
         DOMCache.DOMFields.forEach((field) => {
@@ -144,6 +142,7 @@ const displayController = (function () {
     }
 })();
 
+//checks if the game is over, returns an Object with result properties
 const gameOverChecker = (function () {
     let someoneWon = false;
     let nobodyWon = false;
@@ -227,9 +226,9 @@ const gameController = (function () {
 
     //initialize game buttons
     DOMCache.playButton.addEventListener('click', initializePlayerForm)
-
     DOMCache.playAgainButton.addEventListener('click', resetGame)
     DOMCache.changePlayers.addEventListener('click', changePlayers)
+
     function resetGame() {
         gameBoard.resetBoard();
         displayController.renderBoard();
@@ -242,26 +241,21 @@ const gameController = (function () {
         displayController.displayPlayerFormModal('block')
     }
 
-    //gameController functions
     function initializePlayerForm() {
+        //game is only initialized if form is valid
         if (!DOMCache.form.checkValidity()) return;
         let playerInfo = DOMCache.cachePlayersInfo()
-        //game is only initialized if form is valid
         initializeGame(playerInfo.playerOneName, playerInfo.playerOneTeam, playerInfo.playerTwoName, playerInfo.playerTwoTeam)
         displayController.displayPlayerFormModal('none')
     }
-
-    // function addPlayButtonListener() {
-    //     DOMCache.playButton.addEventListener('click', initializePlayerForm)
-    // }
 
     function finalizeGame(playerOne, playerTwo) {
         let resultObj = gameOverChecker.checkGameOver(playerOne, playerTwo)
         console.log(resultObj);
         if (resultObj.nobodyWon) {
             displayController.displayWinnerModal("It's a tie!", 'block')
-            resultObj = gameOverChecker.reset()
-            displayController.updateEndGameText()
+            resultObj = gameOverChecker.reset();
+            displayController.updateEndGameText();
         } else if (resultObj.someoneWon) {
             displayController.displayWinnerModal(`${resultObj.winner} wins!`, 'block')
             resultObj = gameOverChecker.reset();
@@ -271,7 +265,7 @@ const gameController = (function () {
 
     function initializeGame(playerOneName, playerOneTeam, playerTwoName, playerTwoTeam) {
         //players
-        playerOne = createPlayer(playerOneName, playerOneTeam)
+        playerOne = createPlayer(playerOneName, playerOneTeam);
         playerTwo = createPlayer(playerTwoName, playerTwoTeam);
 
         //initialize field functions
