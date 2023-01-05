@@ -286,9 +286,6 @@ const gameController = (function () {
             }
         }
 
-        //bind() bug here, the old players still retain,
-        //even after initializeGame is called again
-        //IF playerOne and playerTwo are local variables
         DOMCache.DOMFields.forEach((field) => {
             field.addEventListener('click', placeCharOnField.bind(this, field, playerOne, playerTwo));
             field.addEventListener('click', finalizeGame.bind(this, playerOne, playerTwo));
